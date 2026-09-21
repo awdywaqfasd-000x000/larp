@@ -1,0 +1,11 @@
+/* CSS is how you can add style to your website, such as colors, fonts, and positioning of your
+   HTML content. To learn how to do something, just try searching Google for questions like
+   "how to change link color." */
+   
+   /* Yes I stole this from when I used neocities, I know NOTHING about css :sob: */
+
+body {
+  background-color: white;
+  color: black;
+  font-family: sans-serif;
+}
