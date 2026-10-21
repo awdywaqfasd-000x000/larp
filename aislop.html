@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurable Username Generator</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --border-color: #333;
+            --text-main: #e0e0e0;
+            --text-muted: #888;
+            --accent: #00ff66;
+            --accent-hover: #00cc52;
+            --accent-bg: rgba(0, 255, 102, 0.1);
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .wrapper {
+            width: 100%;
+            max-width: 900px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h2, h3 {
+            margin-top: 0;
+            color: var(--accent);
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .output-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .username-display {
+            background: #0d0d0d;
+            border: 1px solid var(--border-color);
+            padding: 30px 15px;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent);
+            border-radius: 4px;
+            margin: 20px 0;
+            word-break: break-all;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button {
+            background-color: var(--accent);
+            color: #000;
+            border: none;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .settings-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        textarea, select, input[type="text"] {
+            width: 100%;
+            background: #0d0d0d;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+        }
+
+        textarea {
+            resize: vertical;
+            height: 70px;
+        }
+
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            background: #0d0d0d;
+            border-radius: 4px;
+        }
+
+        .history-list li {
+            padding: 6px 10px;
+            border-bottom: 1px solid #1a1a1a;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .history-list li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <!-- Generator & Output Panel -->
+    <div class="panel output-panel">
+        <div>
+            <h2>Terminal Output</h2>
+            <div class="username-display" id="outputBox">READY_</div>
+        </div>
+        <div>
+            <button onclick="generateUsername()">Generate Username</button>
+            <div style="margin-top: 20px;">
+                <h3>History</h3>
+                <ul class="history-list" id="historyList">
+                    <!-- History gets injected here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dictionaries & Settings Panel -->
+    <div class="panel">
+        <h2>Exposed Settings & Dictionaries</h2>
+        
+        <div class="settings-group">
+            <label for="patternSelect">Generation Pattern</label>
+            <select id="patternSelect">
+                <option value="adjective-noun-number">Adjective + Noun + Number</option>
+                <option value="prefix-noun-suffix">Prefix + Noun + Suffix</option>
+                <option value="compound-number">Noun + Noun + Number</option>
+                <option value="raw-mix">Random Shuffle Mix</option>
+            </select>
+        </div>
+
+        <div class="settings-group">
+            <label for="adjectivesInput">Adjectives Array (comma-separated)</label>
+            <textarea id="adjectivesInput">Cyber, Glitch, Void, Phantom, Toxic, Neon, Rogue, Static, Frost, Shadow</textarea>
+        </div>
+
+        <div class="settings-group">
+            <label for="nounsInput">Nouns Array (comma-separated)</label>
+            <textarea id="nounsInput">Viper, Ghost, Hacker, Sentinel, Ninja, Wraith, Daemon, Zero, Core, Byte</textarea>
+        </div>
+
+        <div class="settings-group">
+            <label for="prefixesInput">Prefixes Array (comma-separated)</label>
+            <textarea id="prefixesInput">x_, _v, iAm, The, Real, Dr</textarea>
+        </div>
+
+        <div class="settings-group">
+            <label for="suffixesInput">Suffixes Array (comma-separated)</label>
+            <textarea id="suffixesInput">_ofc, 99, 01, x, z</textarea>
+        </div>
+
+        <div class="settings-group">
+            <label>Number Range</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="numMin" value="1" placeholder="Min">
+                <input type="text" id="numMax" value="999" placeholder="Max">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Helper to parse comma-separated lists from textareas into clean arrays
+    function parseArray(elementId) {
+        return document.getElementById(elementId).value
+            .split(',')
+            .map(item => item.trim())
+            .filter(item => item.length > 0);
+    }
+
+    function getRandomItem(arr) {
+        if (!arr || arr.length === 0) return '';
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function getRandomNum(min, max) {
+        min = parseInt(min) || 0;
+        max = parseInt(max) || 100;
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    const historyArray = [];
+
+    function generateUsername() {
+        const pattern = document.getElementById('patternSelect').value;
+        const adjectives = parseArray('adjectivesInput');
+        const nouns = parseArray('nounsInput');
+        const prefixes = parseArray('prefixesInput');
+        const suffixes = parseArray('suffixesInput');
+        const minVal = document.getElementById('numMin').value;
+        const maxVal = document.getElementById('numMax').value;
+
+        let result = '';
+
+        switch(pattern) {
+            case 'adjective-noun-number':
+                result = getRandomItem(adjectives) + getRandomItem(nouns) + getRandomNum(minVal, maxVal);
+                break;
+            case 'prefix-noun-suffix':
+                result = getRandomItem(prefixes) + getRandomItem(nouns) + getRandomItem(suffixes);
+                break;
+            case 'compound-number':
+                result = getRandomItem(nouns) + getRandomItem(nouns) + getRandomNum(minVal, maxVal);
+                break;
+            case 'raw-mix':
+                const pool = [...adjectives, ...nouns, ...prefixes];
+                result = getRandomItem(pool) + getRandomItem(pool) + getRandomNum(minVal, maxVal);
+                break;
+            default:
+                result = getRandomItem(nouns) + getRandomNum(1, 99);
+        }
+
+        // Output to DOM
+        document.getElementById('outputBox').textContent = result;
+
+        // Push to history
+        historyArray.unshift(result);
+        if (historyArray.length > 8) historyArray.pop();
+        
+        updateHistoryUI();
+    }
+
+    function updateHistoryUI() {
+        const list = document.getElementById('historyList');
+        list.innerHTML = '';
+        historyArray.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = item;
+            list.appendChild(li);
+        });
+    }
+
+    // Run initial generation on load
+    generateUsername();
+</script>
+
+</body>
+</html>
